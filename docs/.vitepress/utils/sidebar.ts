@@ -10,7 +10,8 @@ export const sidebar = {
       collapsible: true,
       link: '/docs/dev',
       items: [
-        { text: 'dev', link: '/docs/dev' },
+        { text: '日常开发技巧', link: '/docs/dev' },
+        { text: 'VS Code技巧', link: '/docs/vscode_tips' },
       ]
     }
   ]
