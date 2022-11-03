@@ -1,9 +1,10 @@
-a docs about 15 members 😻
+<h2>a docs about 15 members 😻</h2>
 
 contributor:
-winches:
 
-<img src="https://avatars.githubusercontent.com/u/96854855?s=40&v=4">
-
-yang1206
-<img src="https://avatars.githubusercontent.com/u/28709596?s=70&v=4">
+<div style="display:flex">
+<b>winches:<b/>
+<img style="height:60px" src="https://avatars.githubusercontent.com/u/96854855?s=40&v=4">
+<b>yang1206:</b>
+<img style="height:60px" src="https://avatars.githubusercontent.com/u/28709596?s=70&v=4">
+</div
