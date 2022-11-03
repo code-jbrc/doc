@@ -1,6 +1,6 @@
 <h2>docs about 15 members 😀</h2>
 
-contributor:
+<h1>contributor:</h1>
 
 <div style="display:flex">
 <b>winchesHe:<b/>
