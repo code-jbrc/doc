@@ -129,4 +129,126 @@ let canOpenDialog = computed<boolean>(() => {
 直接看这篇文章就好了https://juejin.cn/post/7091938459589279752
 写ifelse之前 先想一想是对应什么情况
 
-### 接口封装的思路
+### Github代码上传自动转CRLF的问题
+
+LF和CRLF区别
+
+CRLF: "\r\n", windows系统环境下的换行方式
+
+LF: "\n", Linux系统环境下的换行方式
+
+github会自动将上传的代码转化为crlf，即便代码是lf的，所以要添加这条语句
+
+```
+git config --global core.autocrlf false
+```
+否则会引起crlf和lf的eslint报错
+
+### 按需引入插件细节
+
+首先unplugin-auto-import 和 unplugin-vue-template两个插件可以帮助我们去按需引入组件的一些内容
+细节在于 vue.config.js的配置
+
+```
+/* eslint-disable */
+const { defineConfig } = require("@vue/cli-service");
+const AutoImport = require("unplugin-auto-import/webpack");
+const Components = require("unplugin-vue-components/webpack");
+const { NaiveUiResolver } = require("unplugin-vue-components/resolvers");
+
+module.exports = defineConfig({
+  // 构建依赖babel全转换
+  transpileDependencies: true,
+  publicPath: "/",
+  // 构建之后的目录名字
+  outputDir: "dist",
+  // 构建之后静态资源存放的目录名字
+  assetsDir: "static",
+  // 生产中禁用eslint报错
+  // lintOnSave: process.env.NODE_ENV !== 'production',
+  // 生产阶段的sourceMap 加快生产构建
+  // productionSourceMap: false,
+  //webpack 配置的项目名称
+  devServer: {
+    hot: true,
+    port: 9999,
+    host: "localhost",
+    open: false,
+    client: {
+      overlay: {
+        warnings: true,
+        errors: true,
+      },
+    },
+  },
+  configureWebpack: {
+    // resolve: {
+    //   alias: {
+    //     '@': resolve('src'),
+    //   }
+    // }, 
+    plugins: [
+      // vue(),
+      AutoImport({
+        imports: [
+          "vue",
+          {
+            "naive-ui": ["useDialog", "useMessage", "useNotification", "useLoadingBar","NButton"],
+          },
+        ],
+        // eslint报错解决
+        eslintrc: {
+          enabled: false, // Default `false`
+          filepath: "./.eslintrc-auto-import.json", // Default `./.eslintrc-auto-import.json`
+          globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
+        },
+      }),
+      Components({
+        resolvers: [NaiveUiResolver()],
+      }),
+    ],
+  },
+});
+
+```
+
+注意48行这段代码 设置true的时候重启项目会自动创建需要导入的内容json，然后eslint就会识别到，设置一次之后调为false即可
+.eslintrc.js配置
+
+```
+      extends: [
+    'plugin:vue/vue3-essential',
+    '@vue/airbnb',
+    './.eslintrc-auto-import.json',//重点
+  ],
+```
+
+
+### 动态引入图片
+图片在模板中引入常常会使用到条件插入，例如
+```
+<img :src=`@/static/xxxx-${picName}.jpg`>
+```
+
+但是这样的话 打完包之后就会失效
+原因是webpack把他当成了静态资源去处理，所以导致了错误
+解决方法有两种
+1. 直接import图片
+把需要用到的静态图片全部import进来，然后使用映射去弄
+2. require图片
+直接require里面写映射 适合单图片流
+
+
+```
+    <img alt="jojo" :src="require(`../assets/${name}.png`)">
+```
+
+但上面的写法到了waterfall这样的组件中可能会出现问题，所以多图静态渲染建议的话直接使用下面的写法确保完全没问题
+
+```
+const imgArray = [
+    {img:require('../assets/jojo1.png')},
+    {img:require('../assets/jojo2.png')},
+    {img:require('../assets/jojo3.png')},
+]
+```
