@@ -1,4 +1,4 @@
-<h2>a docs about 15 members 😻</h2>
+<h2>a docs about 15 members 😀</h2>
 
 contributor:
 
