@@ -129,4 +129,17 @@ let canOpenDialog = computed<boolean>(() => {
 直接看这篇文章就好了https://juejin.cn/post/7091938459589279752
 写ifelse之前 先想一想是对应什么情况
 
-### 接口封装的思路
+### Github代码上传自动转CRLF的问题
+
+LF和CRLF区别
+
+CRLF: "\r\n", windows系统环境下的换行方式
+
+LF: "\n", Linux系统环境下的换行方式
+
+github会自动将上传的代码转化为crlf，即便代码是lf的，所以要添加这条语句
+
+```
+git config --global core.autocrlf false
+```
+否则会引起crlf和lf的eslint报错
