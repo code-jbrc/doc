@@ -222,3 +222,33 @@ module.exports = defineConfig({
     './.eslintrc-auto-import.json',//重点
   ],
 ```
+
+
+### 动态引入图片
+图片在模板中引入常常会使用到条件插入，例如
+```
+<img :src=`@/static/xxxx-${picName}.jpg`>
+```
+
+但是这样的话 打完包之后就会失效
+原因是webpack把他当成了静态资源去处理，所以导致了错误
+解决方法有两种
+1. 直接import图片
+把需要用到的静态图片全部import进来，然后使用映射去弄
+2. require图片
+直接require里面写映射 适合单图片流
+
+
+```
+    <img alt="jojo" :src="require(`../assets/${name}.png`)">
+```
+
+但上面的写法到了waterfall这样的组件中可能会出现问题，所以多图静态渲染建议的话直接使用下面的写法确保完全没问题
+
+```
+const imgArray = [
+    {img:require('../assets/jojo1.png')},
+    {img:require('../assets/jojo2.png')},
+    {img:require('../assets/jojo3.png')},
+]
+```
