@@ -143,3 +143,82 @@ github会自动将上传的代码转化为crlf，即便代码是lf的，所以�
 git config --global core.autocrlf false
 ```
 否则会引起crlf和lf的eslint报错
+
+### 按需引入插件细节
+
+首先unplugin-auto-import 和 unplugin-vue-template两个插件可以帮助我们去按需引入组件的一些内容
+细节在于 vue.config.js的配置
+
+```
+/* eslint-disable */
+const { defineConfig } = require("@vue/cli-service");
+const AutoImport = require("unplugin-auto-import/webpack");
+const Components = require("unplugin-vue-components/webpack");
+const { NaiveUiResolver } = require("unplugin-vue-components/resolvers");
+
+module.exports = defineConfig({
+  // 构建依赖babel全转换
+  transpileDependencies: true,
+  publicPath: "/",
+  // 构建之后的目录名字
+  outputDir: "dist",
+  // 构建之后静态资源存放的目录名字
+  assetsDir: "static",
+  // 生产中禁用eslint报错
+  // lintOnSave: process.env.NODE_ENV !== 'production',
+  // 生产阶段的sourceMap 加快生产构建
+  // productionSourceMap: false,
+  //webpack 配置的项目名称
+  devServer: {
+    hot: true,
+    port: 9999,
+    host: "localhost",
+    open: false,
+    client: {
+      overlay: {
+        warnings: true,
+        errors: true,
+      },
+    },
+  },
+  configureWebpack: {
+    // resolve: {
+    //   alias: {
+    //     '@': resolve('src'),
+    //   }
+    // }, 
+    plugins: [
+      // vue(),
+      AutoImport({
+        imports: [
+          "vue",
+          {
+            "naive-ui": ["useDialog", "useMessage", "useNotification", "useLoadingBar","NButton"],
+          },
+        ],
+        // eslint报错解决
+        eslintrc: {
+          enabled: false, // Default `false`
+          filepath: "./.eslintrc-auto-import.json", // Default `./.eslintrc-auto-import.json`
+          globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
+        },
+      }),
+      Components({
+        resolvers: [NaiveUiResolver()],
+      }),
+    ],
+  },
+});
+
+```
+
+注意48行这段代码 设置true的时候重启项目会自动创建需要导入的内容json，然后eslint就会识别到，设置一次之后调为false即可
+.eslintrc.js配置
+
+```
+      extends: [
+    'plugin:vue/vue3-essential',
+    '@vue/airbnb',
+    './.eslintrc-auto-import.json',//重点
+  ],
+```
