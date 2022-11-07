@@ -252,3 +252,14 @@ const imgArray = [
     {img:require('../assets/jojo3.png')},
 ]
 ```
+
+## 在顶层使用await
+
+**注意：**
+
+仅当 “module” 选项设置为 “es2022”、“esnext”、“system”、“node16” 或 “nodenext”，且 “target” 选项设置为 “es2017” 或更高版本时，才允许使用顶级 “await” 表达式。
+
+`package.json`添加type为module
+```json
+"type": "module",
+```
