@@ -263,3 +263,50 @@ const imgArray = [
 ```json
 "type": "module",
 ```
+使用ts-node运行ts脚本以及踩过的坑
+应用场景
+在代码日常中，经常会需要写各种脚本，今天使用ts写了个脚本，运行的时候各种报错，还是决定写下来。
+
+运行ts脚本需要一个库ts-node，这个库不能全局安装，否则会报错。
+
+yarn add -D ts-node
+# 使用ts-node运行ts脚本以及踩过的坑
+npm i ts-node -D
+使用
+安装好后开始添加配置项：
+
+在ts.config.json中添加配置"mudoule": esnext或es2005
+在package.json中添加配置"type":"modules"
+在文件中的import语句中「包含文件扩展名」，如import data from './data'改为import data from './data.js'，另外.ts后缀也要改为.js
+然后就可以使用命令行命令运行ts脚本。
+
+node --loader ts-node/esm ./my-script.ts
+报错
+在这个过程中报错不少，在网上各种论坛跑来跑去，终于解决了问题。
+
+❝
+SyntaxError: Cannot use import statement outside a module
+
+❞
+无法在模块外使用import，解决这个问题需要在package.json文件中添加"type":"modules"。
+
+❝
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\1\Desktop\my-project\data' imported from 'C:\Users\1\Desktop\get-data.ts'
+
+❞
+找不到导入的模块，是因为没有在导入的文件中添加后缀名。
+
+❝
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts"
+
+❞
+我收到这条报错的时候，命令行命令使用的是ts-node ./myscripts.ts，改用以下命令时，问题解决。
+
+node --loader ts-node/esm ./my-script.ts
+❝
+ReferenceError: fetch is not defined
+
+❞
+获取数据使用了fetch库，不是标准的Nodejs方法，需要下载node-fetch
+
+yarn add node-fetch
