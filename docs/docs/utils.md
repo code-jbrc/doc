@@ -29,7 +29,7 @@ export class ChainFn {
         executor && this.executorList.push([executor, args]);
     }
 
-    public add(onResFn: ExecutorFn, args?: any) {
+    public add(onResFn: ExecutorFn, ...args: any[]) {
         args = flat([args]);
         return new ChainFn(onResFn, args, this.resList, this.executorList, this.errorList);
     }
@@ -38,7 +38,7 @@ export class ChainFn {
         return executor instanceof Promise ? await (executor as any).apply(this, args) : executor.apply(this, args);
     }
 
-    public async run(onResFn?: Function, args?: any): Promise<ChainFn> {
+    public async run(onResFn?: Function, ...args: any[]): Promise<ChainFn> {
         await this.getValue();
         args = flat([args]);
 
@@ -60,7 +60,6 @@ export class ChainFn {
 
     public async get(allRes = false): Promise<any> {
         await this.getValue();
-        this.resList  = this.resList.filter(v => v);
         return allRes ? this.resList : this.resList[this.resList.length-1];
     }
 
@@ -113,4 +112,56 @@ console.log(await new ChainFn()
  *  7
  *  7 最后的结果
  */
+```
+
+### mini-chainFn (only sync)
+```ts
+type ExecutorFn = (...args: any) => any;
+
+export const flat = (arr: any[], num = 1) => {
+    let i = 0;
+    while (arr.some((item) => Array.isArray(item))) {
+        arr = [].concat(...arr);
+        i++;
+        if (i >= num) break;
+    }
+    return arr;
+};
+
+export class ChainFn {
+    resList!: any[];
+
+    constructor(executor?: ExecutorFn, args?: any, resList: any[] = []) {
+        this.initValue(resList);
+        args = flat([args]);
+        // 执行对应方法
+        const returnValue = executor?.apply(this, args!);
+
+        returnValue && this.resList.push(returnValue);
+    }
+
+    public initValue(resList: any[]) {
+        this.resList = resList;
+    }
+
+    public add(onResFn: ExecutorFn, args: any) {
+        args = flat([args]);
+        return new ChainFn(onResFn, args, this.resList);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    public run(onResFn: Function, args: any) {
+        try {
+            args = flat([args]);
+            const returnValue = onResFn.apply(this, [this.resList, ...args]);
+            if (returnValue) return returnValue;
+        } catch (error) {
+            console.warn(error);
+        }
+    }
+
+    public remove() {
+        return new ChainFn(undefined, undefined, []);
+    }
+}
 ```
